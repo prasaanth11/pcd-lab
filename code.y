@@ -8,37 +8,44 @@
 
 
 %token PRINT STATEMENT
-%token VARIABLE NUMBER
+%token VARIABLE INTEGER
+%token IF ELSE BTRUE BFALSE
 %left '(' ')'
 
 
 %%
 
-python_program 	: 	code{
-							printf("Valid Python Program \n");
-							return 0;
-						}
-				;
-
-code 			: print_stmt
-				;
-
-print_stmt	: PRINT '(' statements ')'
+pythonCode	:	program{
+						printf("\nValid Python Program \n\n");
+						return 0;
+					}
 			;
 
-statements 	: STATEMENT
-			| STATEMENT '+' VARIABLE
-			| STATEMENT '+' statements
-			| VARIABLE  '+' statements
-			| STATEMENT ',' NUMBER
-			| NUMBER ',' STATEMENT
-			| VARIABLE
-			| NUMBER
-			// | expressions
-			| 
+program 	:	program print_stmt
+			|	program if_stmt
+			|
 			;
 
+if_stmt		:	IF conditions ':' print_stmt
+			;
 
+conditions	:	VARIABLE
+			|	BTRUE
+			|	BFALSE
+			;
+
+print_stmt	:	PRINT '(' statements ')'
+			|	PRINT '(' statements ')' ';'
+			|	PRINT '(' statements ')' ';' ';'  { yyerror("\nIn python semicolon should not be at the end of the print statement \n"); }
+			;
+
+statements	:	STATEMENT statements
+			|	'+' statements
+			|	',' statements
+			|	VARIABLE statements
+			|	INTEGER statements
+			|
+			;
 
 %%
 
