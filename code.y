@@ -9,8 +9,12 @@
 
 %token PRINT STATEMENT
 %token VARIABLE INTEGER
-%token IF ELSE BTRUE BFALSE
+%token IF ELSE ELIF BTRUE BFALSE
+
+%left AND OR 
+%left GE LE EQ NE GT LT
 %left '(' ')'
+%right '!' NOT
 
 
 %%
@@ -22,30 +26,63 @@ pythonCode	:	program{
 			;
 
 program 	:	program print_stmt
-			|	program if_stmt
+			|	program conditional_stmt
+			| 	dataTypes { yyerror("statements should be only enclosed in print statement"); }
 			|
 			;
 
-if_stmt		:	IF conditions ':' print_stmt
+conditional_stmt	:	IF expression program elif_stmt else_stmt
+					;
+
+elif_stmt	:	ELIF expression program elif_stmt
+			| 
 			;
 
-conditions	:	VARIABLE
-			|	BTRUE
-			|	BFALSE
+else_stmt	:	ELSE program
+			|
 			;
+
 
 print_stmt	:	PRINT '(' statements ')'
 			|	PRINT '(' statements ')' ';'
-			|	PRINT '(' statements ')' ';' ';'  { yyerror("\nIn python semicolon should not be at the end of the print statement \n"); }
+			|	PRINT '(' statements ')' ';' ';'  { yyerror("\nIn python semicolon should not be at the end of the print statement \n"); }			
 			;
+
 
 statements	:	STATEMENT statements
 			|	'+' statements
 			|	',' statements
-			|	VARIABLE statements
-			|	INTEGER statements
-			|
+			|	expression statements
+			|	
 			;
+
+
+expression 	:	dataTypes
+			|	expression relationalOperations expression
+			|	expression bitwiseOperations expression
+			|	'!' expression
+    		;
+
+relationalOperations 	:	GT
+						|	LT
+						|	LE
+						|	GE
+						|	EQ
+						|	NE
+						;
+
+bitwiseOperations		:	OR
+						|	AND
+						|	NOT
+						;				
+
+dataTypes 	: '!' dataTypes
+			| INTEGER
+			| VARIABLE
+			| BFALSE
+			| BTRUE
+			;
+
 
 %%
 
