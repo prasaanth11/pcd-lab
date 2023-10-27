@@ -11,11 +11,10 @@
 %token VARIABLE INTEGER
 %token IF ELSE ELIF BTRUE BFALSE
 
-%left AND OR 
+%left AND OR
 %left GE LE EQ NE GT LT
 %left '(' ')'
 %right '!' NOT
-
 
 %%
 
@@ -25,44 +24,47 @@ pythonCode	:	program{
 					}
 			;
 
-program 	:	program print_stmt
-			|	program conditional_stmt
-			| 	dataTypes { yyerror("statements should be only enclosed in print statement"); }
+program		:	program program_list
 			|
 			;
 
-conditional_stmt	:	IF expression program elif_stmt else_stmt
+/* list of program offering */
+program_list	:	print_stmt 
+				|	conditional_stmt
+				| 	expression { yyerror("\n Statement should be only enclosed in print statement \n"); }
+				|	dataTypes { yyerror("\n Undefined statement \n"); }
+				;
+
+conditional_stmt 	: 	if_stmt else_stmt
 					;
 
-elif_stmt	:	ELIF expression program elif_stmt
-			| 
-			;
+if_stmt			:	IF expression ':' program_list 
+				|	IF dataTypes ':' program_list
+				;
 
-else_stmt	:	ELSE program
-			|
-			;
+else_stmt		: 	ELSE ':' program_list
 
-
+/* print statement */
 print_stmt	:	PRINT '(' statements ')'
 			|	PRINT '(' statements ')' ';'
 			|	PRINT '(' statements ')' ';' ';'  { yyerror("\nIn python semicolon should not be at the end of the print statement \n"); }			
 			;
 
-
+/* statement inside the print statement  */
 statements	:	STATEMENT statements
 			|	'+' statements
 			|	',' statements
 			|	expression statements
-			|	
+			|	dataTypes statements
+			|
 			;
 
+/* Relational Expression evaluvation */
+expression 	:	dataTypes relationalOperations dataTypes
+			|	dataTypes bitwiseOperations dataTypes
+			;
 
-expression 	:	dataTypes
-			|	expression relationalOperations expression
-			|	expression bitwiseOperations expression
-			|	'!' expression
-    		;
-
+/* Relational statement operators > , < , >= , <= , == , !=  */
 relationalOperations 	:	GT
 						|	LT
 						|	LE
@@ -71,18 +73,18 @@ relationalOperations 	:	GT
 						|	NE
 						;
 
+/* Bitwise operation : or and not */
 bitwiseOperations		:	OR
 						|	AND
 						|	NOT
-						;				
+						;		
 
-dataTypes 	: '!' dataTypes
-			| INTEGER
+/* Data types : int , variables , boolean */
+dataTypes 	: INTEGER
 			| VARIABLE
-			| BFALSE
 			| BTRUE
+			| BFALSE
 			;
-
 
 %%
 
