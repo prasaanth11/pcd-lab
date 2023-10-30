@@ -1,0 +1,2 @@
+yacc -d code.y && lex code.l && gcc lex.yy.c y.tab.c
+./a.out
