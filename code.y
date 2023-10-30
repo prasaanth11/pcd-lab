@@ -85,7 +85,8 @@ list_reverse		:	VARIABLE '.' REVERSE '('  ')'
 					|	VARIABLE '.' REVERSE '(' program_list  ')' { yyerror("\n Invalid syntax for REVERSE function of a list \n"); }
 					;
 
-list_pop			:	VARIABLE '.' POP '(' INTEGER ')'
+list_pop				:	VARIABLE '.' POP '(' ')'
+					|	VARIABLE '.' POP '(' INTEGER ')'
 					|	VARIABLE '.' POP '(' program_list  ')' { yyerror("\n Invalid syntax for POP function of a list \n"); }
 					;
 
