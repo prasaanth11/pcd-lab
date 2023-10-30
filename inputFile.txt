@@ -6,6 +6,8 @@ print(a + "value")
 
 a = 10
 
+a = "hai this is icon"
+
 print(5 < 9)
 print(5 < 7 , 7 < 9)
 
@@ -23,4 +25,11 @@ while a < 5 :
     
     if a < 3 :
         print("dfs")
-        
+
+icon = [11 , "is a good boi" ]        
+icon.remove(0)
+icon.pop(1)
+
+icon.append("this is icon")
+
+icon = [[2]]
