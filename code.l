@@ -16,25 +16,30 @@
 "True"		{ return BTRUE;  }
 "False"		{ return BFALSE; }
 
+
 ":"			{ return ':'; }
 ";"			{ return ';'; }
 ","			{ return ','; }
+
+"["			{ return '['; }
+"]"			{ return ']'; }
 
 "("			{ return '('; }
 ")"			{ return ')'; }
 
 "+"			{ return '+'; }
+"-"			{ return '-'; }
+"*"			{ return '*'; }
+"/"			{ return '/'; }
+"%"			{ return '%'; }
 
 "~"			{ return NOT; }
 "not"		{ return NOT; }
-"NOT"		{ return NOT; }
 
 "&"			{ return AND; }
-"AND"		{ return AND; }
 "and"		{ return AND; }
 
 "|"			{ return OR; }
-"OR"		{ return OR; }
 "or"		{ return OR; }
 
 "while"		{ return WHILE; }
@@ -47,7 +52,6 @@
 "clear"		{ return CLEAR;  }
 "extend"	{ return EXTEND; }
 "reverse"	{ return EXTEND; }
-"extend"	{ return REVERSE;}
 "index"		{ return INDEX;  }
 "count"		{ return COUNT;  }
 "sort"		{ return SORT;   }
