@@ -4,9 +4,23 @@ print("value is stored in " + a )
 print("value is stored in " + a + "value")
 print(a + "value")
 
-if a :
-    print("hai")
-    dsf
+a = 10
 
-if a < 5 :
-    print("hello")
+print(5 < 9)
+print(5 < 7 , 7 < 9)
+
+if shan:
+    print(b)
+    if icon:
+        print(a)
+    else:
+        print(c)
+else:
+    print(d)
+
+while a < 5 :
+    print("heai")
+    
+    if a < 3 :
+        print("dfs")
+        
