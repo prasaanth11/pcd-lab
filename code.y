@@ -17,14 +17,17 @@
 %left AND OR 
 %left GE LE EQ NE GT LT
 %left '(' ')'
+%left '+' '-' '*' '/' '%'
+
 %right '!' NOT
+
 
 %%
 
-pythonCode	:	program{
-						printf("\nValid Python Program \n\n");
-						return 0;
-					}
+pythonCode	:	program {
+							printf("\nValid Python Program \n\n");
+							return 0;
+						}
 			;
 
 program		:	program program_list
@@ -38,11 +41,30 @@ program_list	:	program_statement
 				|	listOperations
 				;
 
+/* Loops */
 loop_statement		:	while_loop
 					|	for_loop
 					;
 
+/* assignment */
 assignmentations	:	assignmentation
+					;
+
+assignmentation		:	VARIABLE '=' dataTypes
+					|	VARIABLE '=' STATEMENT
+					|	VARIABLE '=' expression
+					|	VARIABLE '=' list_assignment
+					;
+
+list_assignment		:	'[' list_value ']'
+					;
+
+list_value			:	STATEMENT list_value
+					|	boolean list_value
+					|	dataTypes list_value
+					|	'[' list_value ']'
+					|	',' list_value
+					|
 					;
 
 
@@ -91,40 +113,42 @@ list_sorting		:	VARIABLE '.' SORT '(' ')'
 					|	VARIABLE '.' SORT '(' program_list  ')' { yyerror("\n Invalid syntax for sort function of a list \n"); }
 					;
 
-list_removing		:	VARIABLE '.' REMOVE '(' item ')'
+list_removing		:	VARIABLE '.' REMOVE '(' list_value ')'
 					|	VARIABLE '.' REMOVE '('  ')' { yyerror("\n Invalid syntax for remove function  of a list \n"); }
 					;
 
-list_appending		:	VARIABLE '.' APPEND '(' item ')'
+list_appending		:	VARIABLE '.' APPEND '(' list_value ')'
 					|	VARIABLE '.' APPEND '('  ')' { yyerror("\n Invalid syntax for append function  of a list \n"); }
 					;
 
 join_list			:	VARIABLE join_list
 					|	'+' VARIABLE
 					|	VARIABLE '+' { yyerror("\n Invalid syntax for joining the list. + wont come at the end \n"); }
-
-item				:	dataTypes
-					|	boolean
 					;
 
-
-/* assignment */
-assignmentation		:	VARIABLE '=' INTEGER
-					|	VARIABLE '=' VARIABLE
-					|	VARIABLE '=' STATEMENT
-					;
 
 /* for loop */
-for_loop			:	FOR  VARIABLE IN  RANGE '('  dataTypes ',' dataTypes ',' dataTypes ')' ':' program_list
+for_loop			:	FOR  VARIABLE IN  RANGE '('  dataTypes  ')' ':' program_list
+					|	FOR  VARIABLE IN  RANGE '('  boolean  ')' ':' program_list
 					|	FOR  VARIABLE IN  RANGE '('  dataTypes ',' dataTypes  ')' ':' program_list
+					|	FOR  VARIABLE IN  RANGE '('  dataTypes ',' dataTypes ',' dataTypes ')' ':' program_list
+					|	FOR  VARIABLE IN  RANGE '('  boolean  ')'  program_list	{ yyerror("\n Colon missing after the closing bracket. \n"); }
+					|	FOR  VARIABLE IN  RANGE '('  dataTypes ')' program_list { yyerror("\n Colon missing after the closing bracket. \n"); }
+					|	FOR  VARIABLE IN  RANGE '('  dataTypes ',' dataTypes  ')'  program_list { yyerror("\n Colon missing after the closing bracket. \n"); }
+					|	FOR  VARIABLE IN  RANGE '('  dataTypes ',' dataTypes ',' dataTypes ')' program_list { yyerror("\n Colon missing after the closing bracket. \n"); }
+					|	FOR  VARIABLE IN  RANGE '('  ')' ':' program_list { yyerror("\n Range function is should not be empty. \n"); }
+					;
 
 /* while loop */
 while_loop			:	WHILE expression ':' program_list
 					|	WHILE dataTypes  ':' program_list
 					|	WHILE boolean  ':' program_list
+					;
 
 /* print statements */
-program_statement	:	print_stmt
+program_statement	:	PRINT '(' statements ')'
+					|	PRINT '(' statements ')' ';'
+					|	PRINT '(' statements ')' ';' ';'  { yyerror("\nIn python semicolon should not be at the end of the print statement \n"); }			
 					|	expression { yyerror("\n Statement should be only enclosed in print statement \n"); }
 					|	dataTypes { yyerror("\n Undefined statement \n"); }
 					;
@@ -135,11 +159,6 @@ conditional_statement 	: 	IF expression ':' program_list %prec IF
 						|	conditional_statement ELSE ':' program_list
 						;
 
-/* print statement */
-print_stmt			:	PRINT '(' statements ')'
-					|	PRINT '(' statements ')' ';'
-					|	PRINT '(' statements ')' ';' ';'  { yyerror("\nIn python semicolon should not be at the end of the print statement \n"); }			
-					;
 
 /* statement inside the print statement  */
 statements			:	STATEMENT statements
@@ -152,13 +171,23 @@ statements			:	STATEMENT statements
 					;
 
 /* Relational Expression evaluvation */
-expression 			:	dataTypes relationalOperations dataTypes
+expression 			:	dataTypes relationalOperators dataTypes
+					|	dataTypes relationalOperations dataTypes
 					|	dataTypes bitwiseOperations dataTypes
 					|	boolean bitwiseOperations boolean
+					|	STATEMENT relationalOperators STATEMENT
+					|	'(' expression ')'
 					;
 
+relationalOperations 	:	'+'
+						|	'-'
+						|	'*'
+						|	'/'
+						|	'%'
+						;
+
 /* Relational statement operators > , < , >= , <= , == , !=  */
-relationalOperations 	:	GT
+relationalOperators 	:	GT
 						|	LT
 						|	LE
 						|	GE
@@ -175,12 +204,10 @@ bitwiseOperations	:	OR
 /* Data types : int , variables , boolean */
 dataTypes 			:	INTEGER
 					|	VARIABLE
-					// | 	NOT dataTypes
 					;
 
 boolean				:	BTRUE
 					|	BFALSE
-					// |	NOT boolean
 					;
 
 %%
