@@ -9,41 +9,64 @@
 %%
 
 "print" 	{ return PRINT; }
+"None"		{ return NONE; }
 
 "if"		{ return IF; }
 "else"		{ return ELSE; }
-"elif"		{ return ELIF; }
 
-"True"		{ return BTRUE; }
+"True"		{ return BTRUE;  }
 "False"		{ return BFALSE; }
+
 
 ":"			{ return ':'; }
 ";"			{ return ';'; }
+","			{ return ','; }
+
+"["			{ return '['; }
+"]"			{ return ']'; }
 
 "("			{ return '('; }
 ")"			{ return ')'; }
 
 "+"			{ return '+'; }
-","			{ return ','; }
+"-"			{ return '-'; }
+"*"			{ return '*'; }
+"/"			{ return '/'; }
+"%"			{ return '%'; }
+"**"		{ return SQUARE; }
 
 "~"			{ return NOT; }
 "not"		{ return NOT; }
-"NOT"		{ return NOT; }
 
 "&"			{ return AND; }
-"AND"		{ return AND; }
 "and"		{ return AND; }
 
 "|"			{ return OR; }
-"OR"		{ return OR; }
 "or"		{ return OR; }
 
+"while"		{ return WHILE; }
+"for"		{ return FOR;   }
+"in"		{ return IN;    }
+"range"		{ return RANGE; }
+
+"append"	{ return APPEND; }
+"remove"	{ return REMOVE; }
+"clear"		{ return CLEAR;  }
+"extend"	{ return EXTEND; }
+"reverse"	{ return EXTEND; }
+"index"		{ return INDEX;  }
+"count"		{ return COUNT;  }
+"sort"		{ return SORT;   }
+"pop"		{ return POP;   }
+
+"="			{ return '='; }
 ">="    	{ return GE; }
 "<="    	{ return LE; }
 "=="    	{ return EQ; }
 "!="    	{ return NE; }
 ">"     	{ return GT; }
 "<"     	{ return LT; }
+"."			{ return '.'; }
 
 \".*\"  	{ yylval = atoi(yytext); return STATEMENT; }
 \'.*\'  	{ yylval = atoi(yytext); return STATEMENT; }
