@@ -36,8 +36,161 @@ program		:	program program_list
 
 
 program_list		:	print_statement
+					|	assignmentations
+					|	conditional_statement
 					|	loop_statement
+					|	listOperations
 					;
+
+
+/* assigmentation */
+assignmentations	:	VARIABLE '=' dataTypes
+					|	VARIABLE '=' expression
+					|	VARIABLE '=' statements
+					|	VARIABLE '=' list_assignment
+					;
+
+
+/* Conditional statements */
+conditional_statement 	: 	IF expression ':' program_list %prec IF
+						|	IF dataTypes  ':' program_list %prec IF
+						|	IF boolean  ':' program_list %prec IF
+						|	conditional_statement ELSE ':' program_list
+
+						/* error statement in if condition */
+						|	IF expression program_list %prec IF		{ yyerror("\n Colon ':' is missing in the if statement \n"); }
+						|	IF dataTypes  program_list %prec IF		{ yyerror("\n Colon ':' is missing in the if statement \n"); }
+						|	IF boolean  program_list %prec IF		{ yyerror("\n Colon ':' is missing in the if statement \n"); }
+						|	conditional_statement ELSE program_list { yyerror("\n Colon ':' is missing in the else statement \n"); }
+						|	IF ':' program_list %prec IF		{ yyerror("\n Condition is missing before the ':' in the if statement \n"); }
+						|	IF program_list %prec IF		{ yyerror("\n Condition statement in the if statement \n"); }
+						|
+						;
+
+list_assignment			:	'[' list_value ']'
+						|	'[' list_value			{ yyerror("\nClosing bracket is missing in the list declaration \n"); }
+						|	list_value	']'			{ yyerror("\nClosing bracket is missing in the list declaration \n"); }
+						;
+
+list_value				:	STATEMENT list_value
+						|	boolean list_value
+						|	dataTypes list_value
+						|	'[' list_value ']'
+						|	',' list_value
+						|
+						;
+
+
+listOperations			:	list_removing
+						|	list_sorting
+						|	list_appending
+						|	join_list
+						|	list_clear
+						|	list_copy
+						|	list_count
+						|	list_extend
+						|	list_index
+						|	list_pop
+						|	list_reverse
+						;
+
+
+list_reverse		:	VARIABLE '.' REVERSE '('  ')'
+					|	'.' REVERSE '(' ')'  						{ yyerror("\n List name is missing before REVERSE function \n"); }
+					|	VARIABLE '.' REVERSE ')'  					{ yyerror("\n Opening bracket is REVERSE function of a list \n"); }
+					|	VARIABLE '.' REVERSE '('  					{ yyerror("\n Closing bracket is REVERSE function of a list \n"); }
+					|	VARIABLE '.' REVERSE '(' dataTypes  ')' 	{ yyerror("\n Invalid syntax for REVERSE function of a list \n"); }
+					|	VARIABLE '.' REVERSE '(' program_list  ')' 	{ yyerror("\n Invalid syntax for REVERSE function of a list \n"); }
+					;
+
+list_pop			:	VARIABLE '.' POP '(' ')'
+					|	VARIABLE '.' POP '(' INTEGER ')'
+					|	'.' POP '(' ')'  							{ yyerror("\n List name is missing before pop function \n"); }
+					|	VARIABLE '.' POP ')'  						{ yyerror("\n Opening bracket is POP function of a list \n"); }
+					|	VARIABLE '.' POP '('  						{ yyerror("\n Closing bracket is POP function of a list \n"); }
+					|	VARIABLE '.' POP '(' dataTypes  ')' 		{ yyerror("\n Invalid syntax for POP function of a list \n"); }
+					|	VARIABLE '.' POP '(' program_list  ')' 		{ yyerror("\n Invalid syntax for POP function of a list \n"); }
+					;
+
+list_index			:	VARIABLE '.' INDEX '(' dataTypes ')'
+					|	VARIABLE '.' INDEX '('  ')'					{ yyerror("\n INDEX function requires a parameter \n"); }
+					|	'.' INDEX '('  ')'							{ yyerror("\n List name is missing before INDEX function \n"); }
+					|	'.' INDEX '(' dataTypes ')'					{ yyerror("\n List name is missing before INDEX function \n"); }
+					|	VARIABLE '.' INDEX ')'  					{ yyerror("\n Opening bracket is INDEX function of a list \n"); }
+					|	VARIABLE '.' INDEX '('  					{ yyerror("\n Closing bracket is INDEX function of a list \n"); }
+					|	VARIABLE '.' INDEX '(' program_list  ')' 	{ yyerror("\n Invalid syntax for INDEX function of a list \n"); }
+					;
+
+list_extend			:	VARIABLE '.' EXTEND '(' VARIABLE ')'
+					|	'.' EXTEND '(' ')'  						{ yyerror("\n List name is missing before EXTEND function \n"); }
+					|	VARIABLE '.' EXTEND ')'  					{ yyerror("\n Opening bracket is INDEX function of a list \n"); }
+					|	VARIABLE '.' EXTEND '('  					{ yyerror("\n Closing bracket is INDEX function of a list \n"); }
+					|	VARIABLE '.' EXTEND '(' program_list  ')' 	{ yyerror("\n Invalid syntax for EXTEND function of a list \n"); }
+					;
+
+list_count			:	VARIABLE '.' COUNT '(' dataTypes ')'
+					|	VARIABLE '.' COUNT '('  ')'					{ yyerror("\n COUNT function requires a parameter \n"); }
+					|	'.' COUNT '(' ')'  							{ yyerror("\n List name is missing before COUNT function \n"); }
+					|	VARIABLE '.' COUNT ')'  					{ yyerror("\n Opening bracket is COUNT function of a list \n"); }
+					|	VARIABLE '.' COUNT '('  					{ yyerror("\n Closing bracket is COUNT function of a list \n"); }
+					|	VARIABLE '.' COUNT '(' program_list  ')' 	{ yyerror("\n Invalid syntax for COUNT function of a list \n"); }
+					;
+
+list_copy			:	VARIABLE '.' COPY '(' ')'
+					|	VARIABLE '.' COPY '(' dataTypes ')'			{ yyerror("\n COPY function does not requires a parameter \n"); }
+					|	'.' COPY '(' ')'  							{ yyerror("\n List name is missing before COPY function \n"); }
+					|	VARIABLE '.' COPY ')'  						{ yyerror("\n Opening bracket is COPY function of a list \n"); }
+					|	VARIABLE '.' COPY '('  						{ yyerror("\n Closing bracket is COPY function of a list \n"); }
+					|	VARIABLE '.' COPY '(' program_list  ')' 	{ yyerror("\n Invalid syntax for COPY function of a list \n"); }
+					;
+
+list_clear			:	VARIABLE '.' CLEAR '(' ')'
+					|	VARIABLE '.' CLEAR '(' dataTypes ')'		{ yyerror("\n CLEAR function does not requires a parameter \n"); }
+					|	'.' CLEAR '(' ')'  							{ yyerror("\n List name is missing before CLEAR function \n"); }
+					|	VARIABLE '.' CLEAR ')'  					{ yyerror("\n Opening bracket is CLEAR function of a list \n"); }
+					|	VARIABLE '.' CLEAR '('  					{ yyerror("\n Closing bracket is CLEAR function of a list \n"); }
+					|	VARIABLE '.' CLEAR '(' program_list  ')' 	{ yyerror("\n Invalid syntax for CLEAR function of a list \n"); }
+					;
+
+list_sorting		:	VARIABLE '.' SORT '(' ')'
+					|	VARIABLE '.' SORT '(' dataTypes ')'			{ yyerror("\n SORT function does not requires a parameter \n"); }
+					|	'.' SORT '(' ')'  							{ yyerror("\n List name is missing before SORT function \n"); }
+					|	VARIABLE '.' SORT ')'  						{ yyerror("\n Opening bracket is SORT function of a list \n"); }
+					|	VARIABLE '.' SORT '('  						{ yyerror("\n Closing bracket is SORT function of a list \n"); }
+					|	VARIABLE '.' SORT '(' program_list  ')' 	{ yyerror("\n Invalid syntax for sort function of a list \n"); }
+					;
+
+list_removing		:	VARIABLE '.' REMOVE '(' list_value ')'
+					|	VARIABLE '.' REMOVE '(' dataTypes ')'
+					|	VARIABLE '.' REMOVE '(' boolean ')'		
+					|	'.' REMOVE '(' ')'  						{ yyerror("\n List name is missing before REMOVE function \n"); }
+					|	VARIABLE '.' REMOVE list_value ')'			{ yyerror("\n Opening bracket is REMOVE function of a list \n"); }
+					|	VARIABLE '.' REMOVE dataTypes ')'			{ yyerror("\n Opening bracket is REMOVE function of a list \n"); }
+					|	VARIABLE '.' REMOVE  ')'					{ yyerror("\n Opening bracket is REMOVE function of a list \n"); }
+					|	VARIABLE '.' REMOVE '('  					{ yyerror("\n Closing bracket is REMOVE function of a list \n"); }
+					|	VARIABLE '.' REMOVE '('  list_value			{ yyerror("\n Closing bracket is REMOVE function of a list \n"); }
+					|	VARIABLE '.' REMOVE '('  dataTypes			{ yyerror("\n Closing bracket is REMOVE function of a list \n"); }
+					|	VARIABLE '.' REMOVE '('  ')' 				{ yyerror("\n Invalid syntax for remove function  of a list \n"); }
+					;
+
+list_appending		:	VARIABLE '.' APPEND '(' list_value ')'
+					|	VARIABLE '.' APPEND '(' dataTypes ')'
+					|	VARIABLE '.' APPEND '(' boolean ')'
+					|	'.' APPEND '(' ')'  						{ yyerror("\n List name is missing before APPEND function \n"); }
+					|	VARIABLE '.' APPEND list_value ')'			{ yyerror("\n Opening bracket is APPEND function of a list \n"); }
+					|	VARIABLE '.' APPEND dataTypes ')'			{ yyerror("\n Opening bracket is APPEND function of a list \n"); }
+					|	VARIABLE '.' APPEND  ')'					{ yyerror("\n Opening bracket is APPEND function of a list \n"); }
+					|	VARIABLE '.' APPEND '('  					{ yyerror("\n Closing bracket is APPEND function of a list \n"); }
+					|	VARIABLE '.' APPEND '('  list_value			{ yyerror("\n Closing bracket is APPEND function of a list \n"); }
+					|	VARIABLE '.' APPEND '('  dataTypes			{ yyerror("\n Closing bracket is APPEND function of a list \n"); }
+					|	VARIABLE '.' APPEND '('  ')' 				{ yyerror("\n Invalid syntax for append function  of a list \n"); }
+					;
+
+join_list			:	VARIABLE join_list
+					|	'+' VARIABLE
+					|	VARIABLE '+' { yyerror("\n Invalid syntax for joining the list. + wont come at the end \n"); }
+					;
+
 
 
 /* loops */
@@ -53,12 +206,12 @@ for_loop			:	FOR  VARIABLE IN  RANGE '('  dataTypes  ')' ':' program_list
 					|	FOR  VARIABLE IN  VARIABLE ':' program_list
 
 					/* error in for loops */
-					|	FOR  VARIABLE IN  boolean ':' program_list { yyerror("\n Boolean object is iteratable \n"); }
+					|	FOR  VARIABLE IN  boolean ':' program_list 				{ yyerror("\n Boolean object is iteratable \n"); }
 					|	FOR  VARIABLE IN  RANGE '('  boolean  ')'  program_list	{ yyerror("\n Colon missing after the closing bracket in for loop. \n"); }
 					|	FOR  VARIABLE IN  RANGE '('  dataTypes ')' program_list { yyerror("\n Colon missing after the closing bracket in for loop. \n"); }
 					|	FOR  VARIABLE IN  RANGE '('  dataTypes ',' dataTypes  ')'  program_list { yyerror("\n Colon missing after the closing bracket in for loop. \n"); }
 					|	FOR  VARIABLE IN  RANGE '('  dataTypes ',' dataTypes ',' dataTypes ')' program_list { yyerror("\n Colon missing after the closing bracket in for loop. \n"); }
-					|	FOR  VARIABLE IN  RANGE '('  ')' ':' program_list { yyerror("\n Range function is should not be empty in for loop. \n"); }
+					|	FOR  VARIABLE IN  RANGE '('  ')' ':' program_list 		{ yyerror("\n Range function is should not be empty in for loop. \n"); }
 					;
 
 /* while loop */
@@ -78,12 +231,12 @@ while_loop			:	WHILE expression ':' program_list
 					;
 
 
-
 /* print statement */
 print_statement		:	PRINT '(' statements ')'
 					|	PRINT '(' statements ')' ';'
-					|	PRINT '(' VARIABLE '[' STATEMENT ']' ')'
-					|	PRINT '(' VARIABLE '[' INTEGER ']' ')'
+					|	PRINT '(' VARIABLE '[' list_value ']' ')'
+					|	PRINT '(' VARIABLE list_value  ')'
+					|	PRINT '(' VARIABLE '[' list_value ']''[' list_value ']'  ')'
 
 					/* error statement in print */
 					|	PRINT '(' statements 				{ yyerror("\n Closing bracket is missing in the print statement \n"); }
@@ -130,6 +283,7 @@ expression			:	dataTypes
 					
 					/* error in expression evaluvation */
 					|	expression relationalOperations	{ yyerror("\n Right hand side production is missing \n"); }
+					|	expression '='	{ yyerror("\n Right hand side production is missing \n"); }
 					|	expression relationalOperators	{ yyerror("\n Right hand side production is missing \n"); }
 					|	expression bitwiseOperations	{ yyerror("\n Right hand side production is missing \n"); }
 					|	boolean bitwiseOperations		{ yyerror("\n Right hand side production is missing \n"); }
@@ -145,7 +299,7 @@ relationalOperations 	:	'-'
 						|	'+'
 						|	SQUARE
 						;
-						
+												
 
 /* Relational statement operators > , < , >= , <= , == , !=  */
 relationalOperators 	:	GT
@@ -156,11 +310,13 @@ relationalOperators 	:	GT
 						|	NE
 						;
 
+
 /* Bitwise operation : or and not */
 bitwiseOperations	:	OR
 					|	AND
 					|	NOT
 					;	
+
 
 dataTypes 	:	INTEGER
 			|	VARIABLE
