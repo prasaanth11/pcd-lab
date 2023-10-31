@@ -9,7 +9,16 @@
 %%
 
 "print" 	{ return PRINT; }
+
 "None"		{ return NONE; }
+
+"import"	{ return IMPORT; }
+"as"		{ return AS; }
+"from"		{ return FROM; }
+
+"return"	{ return RETURN; }
+"def"		{ return DEF; }
+"pass"		{ return PASS; }
 
 "if"		{ return IF; }
 "else"		{ return ELSE; }
