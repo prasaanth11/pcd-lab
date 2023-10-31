@@ -32,7 +32,7 @@ pythonCode	:	program {
 						}
 			;
 
-program		:	import_statement
+program		:	import_statement program
 			|	program_list program 
 			|
 			;
