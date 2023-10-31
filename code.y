@@ -12,6 +12,8 @@
 %token IF ELSE BTRUE BFALSE
 %token WHILE FOR IN RANGE
 %token APPEND REMOVE SORT COPY CLEAR COUNT EXTEND INDEX POP REVERSE
+%token IMPORT AS FROM
+%token DEF RETURN PASS
 %nonassoc IF ELSE '=' NONE
 
 %left AND OR 
@@ -30,7 +32,8 @@ pythonCode	:	program {
 						}
 			;
 
-program		:	program program_list
+program		:	import_statement
+			|	program_list program 
 			|
 			;
 
@@ -40,7 +43,51 @@ program_list		:	print_statement
 					|	conditional_statement
 					|	loop_statement
 					|	listOperations
+					|	function
 					;
+
+
+/* IMPORT statement */
+import_statement	:	IMPORT module_name
+					|	IMPORT module_name AS VARIABLE
+					|	FROM VARIABLE import_statement
+					;
+
+
+module_name			:	VARIABLE
+					|	VARIABLE ',' module_name
+					;
+
+
+/* functions */
+function			:	DEF VARIABLE '(' parameter ')' ':' function_body return_statement
+					|	DEF VARIABLE '(' parameter ')' ';' 
+					|	DEF INTEGER '(' parameter ')' ';' 									{ yyerror("\nFunction name is cannot be a number \n"); }
+					|	DEF boolean '(' parameter ')' ';' 									{ yyerror("\nFunction name is cannot be a boolean \n"); }					
+					|	DEF INTEGER '(' parameter ')' ':' function_body return_statement	{ yyerror("\nFunction name is cannot be a number \n"); }
+					|	DEF boolean '(' parameter ')' ':' function_body return_statement	{ yyerror("\nFunction name is cannot be a boolean \n"); }
+					|	DEF  '(' parameter ')' ':' function_body return_statement			{ yyerror("\nFunction name is missing\n"); }
+					|	DEF VARIABLE parameter ')' ':' function_body return_statement		{ yyerror("\nOpening bracket after Function name is missing\n"); }
+					|	DEF VARIABLE '(' parameter ':' function_body return_statement		{ yyerror("\nClosing bracket after Function name is missing\n"); }
+					|	DEF VARIABLE '(' parameter ')' function_body return_statement		{ yyerror("\nColon after bracket is missing\n"); }
+					;
+
+
+parameter			:	VARIABLE parameter
+					|	',' parameter
+					|
+					;
+
+return_statement	:	
+					|	RETURN 
+					|	PASS
+					|	RETURN boolean;
+					|	RETURN VARIABLE;
+					|	RETURN expression;
+					;
+
+function_body		:	program_list
+					;				
 
 
 /* assigmentation */
@@ -62,8 +109,8 @@ conditional_statement 	: 	IF expression ':' program_list %prec IF
 						|	IF dataTypes  program_list %prec IF		{ yyerror("\n Colon ':' is missing in the if statement \n"); }
 						|	IF boolean  program_list %prec IF		{ yyerror("\n Colon ':' is missing in the if statement \n"); }
 						|	conditional_statement ELSE program_list { yyerror("\n Colon ':' is missing in the else statement \n"); }
-						|	IF ':' program_list %prec IF		{ yyerror("\n Condition is missing before the ':' in the if statement \n"); }
-						|	IF program_list %prec IF		{ yyerror("\n Condition statement in the if statement \n"); }
+						|	IF ':' program_list %prec IF			{ yyerror("\n Condition is missing before the ':' in the if statement \n"); }
+						|	IF program_list %prec IF				{ yyerror("\n Condition statement in the if statement \n"); }
 						|
 						;
 
@@ -206,7 +253,7 @@ for_loop			:	FOR  VARIABLE IN  RANGE '('  dataTypes  ')' ':' program_list
 					|	FOR  VARIABLE IN  VARIABLE ':' program_list
 
 					/* error in for loops */
-					|	FOR  VARIABLE IN  boolean ':' program_list 				{ yyerror("\n Boolean object is iteratable \n"); }
+					|	FOR  VARIABLE IN  boolean ':' program_list 				{ yyerror("\n Boolean object is iterable \n"); }
 					|	FOR  VARIABLE IN  RANGE '('  boolean  ')'  program_list	{ yyerror("\n Colon missing after the closing bracket in for loop. \n"); }
 					|	FOR  VARIABLE IN  RANGE '('  dataTypes ')' program_list { yyerror("\n Colon missing after the closing bracket in for loop. \n"); }
 					|	FOR  VARIABLE IN  RANGE '('  dataTypes ',' dataTypes  ')'  program_list { yyerror("\n Colon missing after the closing bracket in for loop. \n"); }
@@ -283,7 +330,7 @@ expression			:	dataTypes
 					
 					/* error in expression evaluvation */
 					|	expression relationalOperations	{ yyerror("\n Right hand side production is missing \n"); }
-					|	expression '='	{ yyerror("\n Right hand side production is missing \n"); }
+					|	expression '='					{ yyerror("\n Right hand side production is missing \n"); }
 					|	expression relationalOperators	{ yyerror("\n Right hand side production is missing \n"); }
 					|	expression bitwiseOperations	{ yyerror("\n Right hand side production is missing \n"); }
 					|	boolean bitwiseOperations		{ yyerror("\n Right hand side production is missing \n"); }
