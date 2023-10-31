@@ -14,14 +14,15 @@
 %token APPEND REMOVE SORT COPY CLEAR COUNT EXTEND INDEX POP REVERSE
 %token IMPORT AS FROM
 %token DEF RETURN PASS
-%nonassoc IF ELSE '=' NONE
+%token IS LEN TYPE STR
+%nonassoc IF ELSE '=' NONE 
 
 %left AND OR 
 %left GE LE EQ NE GT LT
 %left '(' ')'
 %left '+' '-' '*' '/' '%' SQUARE
 
-%right '!' NOT
+%right '!' NOT 
 
 
 %%
@@ -97,6 +98,27 @@ assignmentations	:	VARIABLE '=' dataTypes
 					|	VARIABLE '=' expression
 					|	VARIABLE '=' statements
 					|	VARIABLE '=' list_assignment
+					|	VARIABLE '=' LEN '(' statements ')'
+					|	VARIABLE '=' LEN '(' VARIABLE ')'
+					|	VARIABLE '=' LEN '(' list_assignment ')'
+					|	VARIABLE '=' TYPE '(' INTEGER ')' 
+					|	VARIABLE '=' STR '(' dataTypes ')' 
+					|	VARIABLE '=' STR '(' statements ')' 
+					
+					/* error statement in assignment */
+					|	VARIABLE '=' STR  dataTypes 		{ yyerror("\nSTR object should enclosed with an bracket\n"); } 
+					|	VARIABLE '=' STR  statements  		{ yyerror("\nSTR object should have bracket\n"); } 
+					|	VARIABLE '=' STR  dataTypes ')' 	{ yyerror("\nOpening bracket is missing in STR statement \n"); }
+					|	VARIABLE '=' STR  statements ')' 	{ yyerror("\nOpening bracket is missing in STR statement \n"); }
+					|	VARIABLE '=' TYPE  INTEGER ')' 		{ yyerror("\nOpening bracket is missing in TYPE \n"); }
+					|	VARIABLE '=' TYPE  INTEGER 			{ yyerror("\n Type should have a bracket to enclosed those number in it \n"); }
+					|	VARIABLE '=' LEN statements 		{ yyerror("\n statements should be enclosed with the bracket \n"); }
+					|	VARIABLE '=' LEN VARIABLE 			{ yyerror("\n statements should be enclosed with the bracket \n"); }
+					|	VARIABLE '=' LEN list_assignment 	{ yyerror("\n statements should be enclosed with the bracket \n"); }
+					|	VARIABLE '=' LEN statements ')' 	{ yyerror("\nOpening bracket is missing in len statement \n"); }
+					|	VARIABLE '=' LEN VARIABLE ')'		{ yyerror("\nOpening bracket is missing in len statement \n"); }
+					|	VARIABLE '=' LEN list_assignment ')' { yyerror("\nOpening bracket is missing in len statement \n"); }
+					|	VARIABLE '=' LEN '('  ')' 			{ yyerror("\n Len cannot be empty production \n"); }
 					;
 
 
@@ -271,7 +293,7 @@ print_statement		:	PRINT '(' statements ')'
 					/* error statement in print */
 					|	PRINT  statements ')' 				{ yyerror("\n Opening bracket is missing in the print statement \n"); }
 					|	PRINT  statements  					{ yyerror("\n Opening and closing bracket are missing in the print statement \n"); }
-					|	print_statement ';' ';'  	{ yyerror("\nIn python semicolon should not be at the end of the print statement \n"); }
+					|	print_statement ';' ';'  			{ yyerror("\nIn python semicolon should not be at the end of the print statement \n"); }
 					;
 
 
@@ -287,6 +309,17 @@ statements			:	STATEMENT statements
 					|	dataTypes
 					|	boolean
 					|	NONE
+					|	LEN '(' STATEMENT ')' statements
+					|	STR '(' STATEMENT ')' statements
+					|	STR '(' dataTypes ')' statements
+					|	LEN '(' VARIABLE ')' statements
+					|	LEN '(' list_assignment ')' statements
+					|	'+' STR '(' dataTypes ')' statements
+					|	'+' STR '(' STATEMENT ')' statements
+					|	',' LEN '(' statements ')' statements
+					|	',' LEN '(' VARIABLE ')' statements
+					|	',' LEN '(' STATEMENT ')' statements
+					|	',' LEN '(' list_assignment ')' statements
 					
 					/* error statement in print - statement */
 					|	VARIABLE '+'				{ yyerror("\nIn python print statement, there must be some string after string concatination  \n"); }
@@ -297,6 +330,14 @@ statements			:	STATEMENT statements
 					|	expression ','				{ yyerror("\nIn python print statement, invalid character ',' after an expression  \n"); }
 					|	'+'							{ yyerror("\nIn python print statement, invalid character ',' at the end without following any string or variable \n"); }
 					|	','							{ yyerror("\nIn python print statement, invalid character ',' at the end without following any integer or boolean value  \n"); }
+					|	STR  dataTypes 				{ yyerror("\nSTR object should enclosed with an bracket\n"); } 
+					|	LEN statements 				{ yyerror("\n statements should be enclosed with the bracket \n"); }
+					|	LEN VARIABLE 				{ yyerror("\n statements should be enclosed with the bracket \n"); }
+					|	LEN list_assignment 		{ yyerror("\n statements should be enclosed with the bracket \n"); }
+					|	LEN statements ')' 			{ yyerror("\nOpening bracket is missing in len statement \n"); }
+					|	LEN VARIABLE ')'			{ yyerror("\nOpening bracket is missing in len statement \n"); }
+					|	LEN list_assignment ')' 	{ yyerror("\nOpening bracket is missing in len statement \n"); }
+					|	LEN '('  ')' 				{ yyerror("\n Len cannot be empty production \n"); }
 					|
 					;
 
@@ -309,8 +350,12 @@ expression			:	dataTypes
 					|	expression	bitwiseOperations boolean
 					|	boolean	bitwiseOperations expression
 					|	boolean	bitwiseOperations boolean
+					|	expression membershipOperator expression 
+					|	expression NOT membershipOperator expression 
 					
 					/* error in expression evaluvation */
+					|	expression membershipOperator	{ yyerror("\n Right hand side production is missing \n"); }
+					|	expression NOT membershipOperator { yyerror("\n Right hand side production is missing \n"); }
 					|	expression relationalOperations	{ yyerror("\n Right hand side production is missing \n"); }
 					|	expression '='					{ yyerror("\n Right hand side production is missing \n"); }
 					|	expression relationalOperators	{ yyerror("\n Right hand side production is missing \n"); }
@@ -338,6 +383,9 @@ relationalOperators 	:	GT
 						|	NE
 						;
 
+/* */
+membershipOperator		:	IS
+						;
 
 /* Bitwise operation : or and not */
 bitwiseOperations	:	OR
