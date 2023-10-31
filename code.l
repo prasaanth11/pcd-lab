@@ -16,6 +16,12 @@
 "as"		{ return AS; }
 "from"		{ return FROM; }
 
+"is"		{ return IS; }
+"len"		{ return LEN; }
+"str"		{ return STR; }
+"type"		{ return TYPE; }
+
+
 "return"	{ return RETURN; }
 "def"		{ return DEF; }
 "pass"		{ return PASS; }
@@ -26,7 +32,7 @@
 "True"		{ return BTRUE;  }
 "False"		{ return BFALSE; }
 
-
+19p
 ":"			{ return ':'; }
 ";"			{ return ';'; }
 ","			{ return ','; }
