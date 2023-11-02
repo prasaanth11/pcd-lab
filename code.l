@@ -10,12 +10,27 @@
 
 "print" 	{ return PRINT; }
 
+"None"		{ return NONE; }
+
+"import"	{ return IMPORT; }
+"as"		{ return AS; }
+"from"		{ return FROM; }
+
+"is"		{ return IS; }
+"len"		{ return LEN; }
+"str"		{ return STR; }
+"type"		{ return TYPE; }
+
+
+"return"	{ return RETURN; }
+"def"		{ return DEF; }
+"pass"		{ return PASS; }
+
 "if"		{ return IF; }
 "else"		{ return ELSE; }
 
 "True"		{ return BTRUE;  }
 "False"		{ return BFALSE; }
-
 
 ":"			{ return ':'; }
 ";"			{ return ';'; }
@@ -32,6 +47,7 @@
 "*"			{ return '*'; }
 "/"			{ return '/'; }
 "%"			{ return '%'; }
+"**"		{ return SQUARE; }
 
 "~"			{ return NOT; }
 "not"		{ return NOT; }
@@ -51,7 +67,7 @@
 "remove"	{ return REMOVE; }
 "clear"		{ return CLEAR;  }
 "extend"	{ return EXTEND; }
-"reverse"	{ return EXTEND; }
+"reverse"	{ return REVERSE; }
 "index"		{ return INDEX;  }
 "count"		{ return COUNT;  }
 "sort"		{ return SORT;   }
