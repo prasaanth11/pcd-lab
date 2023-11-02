@@ -1,5 +1,13 @@
 from math import sqrt
 
+class Person:
+
+    def man():
+        return "man"
+    
+    def female():
+        pass
+
 def calculate( a , b, c ) :
     return a * b + c
 
