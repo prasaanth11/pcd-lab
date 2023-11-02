@@ -28,3 +28,10 @@ for i in range(6):
     temp.append(i)
 
 print(temp)
+
+i = 0
+while i < 2 :
+    temp.remove(i)
+    i = i - 1
+
+print(temp)
