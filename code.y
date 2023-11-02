@@ -12,7 +12,8 @@
 %token IF ELSE BTRUE BFALSE
 %token WHILE FOR IN RANGE
 %token APPEND REMOVE SORT COPY CLEAR COUNT EXTEND INDEX POP REVERSE
-%token IMPORT AS FROM
+%token IMPORT AS FROM 
+%token CLASS
 %token DEF RETURN PASS
 %token IS LEN TYPE STR 
 %nonassoc IF ELSE '=' NONE 
@@ -33,20 +34,54 @@ pythonCode	:	program {
 						}
 			;
 
-program		:	program program_list 
-			|	program import_statement
+program		:	program import_statement
+			|	program class_implementation
 			|	program function
+			|	program program_list 
 			|	
 			;
 
 
-program_list		:	print_statement
-					|	assignmentations
-					|	conditional_statement
-					|	loop_statement
-					|	listOperations
-					;
+program_list	:	print_statement
+				|	assignmentations
+				|	conditional_statement
+				|	loop_statement
+				|	listOperations
+				;
 
+
+/* class */
+class_implementation	:	CLASS VARIABLE ':' class_declaration
+						|	CLASS ':' class_declaration 		{ yyerror("\nClass name is missing\n"); }
+						|	CLASS VARIABLE class_declaration 	{ yyerror("\nColon is missing after Class name\n"); }
+						|	CLASS INTEGER class_declaration 	{ yyerror("\nClass name could not be integer \n"); }
+						|	CLASS STATEMENT class_declaration 	{ yyerror("\nClass name could not be STATEMENT \n"); }
+						;
+
+class_declaration	:	DEF VARIABLE '(' VARIABLE ',' parameter ')' ':' return_statement
+					|	DEF VARIABLE '(' VARIABLE ')' ':' return_statement
+					|	PASS	
+
+					/* Error in class functions */
+					|	DEF VARIABLE '(' VARIABLE ',' parameter ')' ';'		{ yyerror("Function body is required in the class"); }
+					|	DEF VARIABLE '(' VARIABLE ')' ';' 					{ yyerror("Function body is required in the class"); }
+					|	DEF VARIABLE '(' INTEGER ',' parameter ')' ':' return_statement		{ yyerror("\nSELF reference cannot be integer\n"); }
+					|	DEF VARIABLE '(' boolean ',' parameter ')' ':' return_statement		{ yyerror("\nSELF reference cannot be boolean\n"); }
+					|	DEF VARIABLE '(' STATEMENT ',' parameter ')' ':' return_statement	{ yyerror("\nSELF reference cannot be STATEMENT\n"); }
+					|	DEF VARIABLE '(' expression ',' parameter ')' ':' return_statement	{ yyerror("\nSELF reference cannot be Expression\n"); }
+					|	DEF VARIABLE '(' INTEGER  ')' ':' return_statement		{ yyerror("\nSELF reference cannot be integer\n"); }
+					|	DEF VARIABLE '(' boolean  ')' ':' return_statement		{ yyerror("\nSELF reference cannot be boolean\n"); }
+					|	DEF VARIABLE '(' STATEMENT  ')' ':' return_statement	{ yyerror("\nSELF reference cannot be STATEMENT\n"); }
+					|	DEF VARIABLE '(' expression ')' ':' return_statement	{ yyerror("\nSELF reference cannot be Expression\n"); }
+					|	DEF INTEGER '(' parameter ')' ';' 					{ yyerror("\nFunction name is cannot be a number \n"); }
+					|	DEF boolean '(' parameter ')' ';' 					{ yyerror("\nFunction name is cannot be a boolean \n"); }					
+					|	DEF INTEGER '(' parameter ')' ':' return_statement	{ yyerror("\nFunction name is cannot be a number \n"); }
+					|	DEF boolean '(' parameter ')' ':' return_statement	{ yyerror("\nFunction name is cannot be a boolean \n"); }
+					|	DEF  '(' parameter ')' ':' return_statement			{ yyerror("\nFunction name is missing\n"); }
+					|	DEF VARIABLE parameter ')' ':' return_statement		{ yyerror("\nOpening bracket after Function name is missing\n"); }
+					|	DEF VARIABLE '(' parameter ':' return_statement		{ yyerror("\nClosing bracket after Function name is missing\n"); }
+					|	DEF VARIABLE '(' parameter ')' return_statement
+					;
 
 /* IMPORT statement */
 import_statement	:	IMPORT module_name
@@ -98,7 +133,6 @@ function_body		:	program_list
 
 
 /* assigmentation */
-
 assignmentations	:	assigmentation program_list
 					;
 
@@ -119,6 +153,7 @@ assigmentation		:	VARIABLE '=' INTEGER
 					|	VARIABLE '=' VARIABLE '(' list_assignment ')' 
 					|	VARIABLE '=' VARIABLE '(' parameter ')' 
 					|	VARIABLE '=' VARIABLE '(' ')' 
+					|	VARIABLE '=' class_object
 					
 					/* error statement in assignment */
 					|	VARIABLE '='							{ yyerror("\n Right hand side production is missing \n"); }
@@ -147,6 +182,12 @@ assigmentation		:	VARIABLE '=' INTEGER
 					|	VARIABLE '=' LEN '('  ')' 			{ yyerror("\n Len cannot be empty production \n"); }
 					;
 
+					
+class_object		:	VARIABLE '.' VARIABLE '(' ')'
+					|	VARIABLE '.' VARIABLE ')' 	{ yyerror("\nOpening bracket is missing object of a class \n"); }
+					|	VARIABLE '.' '(' ')' 		{ yyerror("\nObject name is missing\n"); }
+					;
+
 
 /* Conditional statements */
 conditional_statement 	: 	IF expression ':' program_list %prec IF
@@ -164,13 +205,13 @@ conditional_statement 	: 	IF expression ':' program_list %prec IF
 						|
 						;
 
-
+/* List assignment */
 list_assignment			:	'[' list_value ']'
 						|	'[' list_value			{ yyerror("\nClosing bracket is missing in the list declaration \n"); }
 						|	list_value	']'			{ yyerror("\nClosing bracket is missing in the list declaration \n"); }
 						;
 
-
+/* List value */
 list_value				:	STATEMENT list_value
 						|	boolean list_value
 						|	dataTypes list_value
@@ -193,7 +234,7 @@ listOperations			:	list_removing
 						|	list_reverse
 						;
 
-						
+/* List reverse */	
 list_reverse		:	VARIABLE '.' REVERSE '('  ')'
 					|	'.' REVERSE '(' ')'  						{ yyerror("\n List name is missing before REVERSE function \n"); }
 					|	VARIABLE '.' REVERSE ')'  					{ yyerror("\n Opening bracket is REVERSE function of a list \n"); }
@@ -201,6 +242,7 @@ list_reverse		:	VARIABLE '.' REVERSE '('  ')'
 					|	VARIABLE '.' REVERSE '(' program_list  ')' 	{ yyerror("\n Invalid syntax for REVERSE function of a list \n"); }
 					;
 
+/* List pop */	
 list_pop			:	VARIABLE '.' POP '(' ')'
 					|	VARIABLE '.' POP '(' INTEGER ')'
 					|	'.' POP '(' ')'  							{ yyerror("\n List name is missing before pop function \n"); }
@@ -209,7 +251,7 @@ list_pop			:	VARIABLE '.' POP '(' ')'
 					|	VARIABLE '.' POP '(' program_list  ')' 		{ yyerror("\n Invalid syntax for POP function of a list \n"); }
 					;
 
-
+/* List index */	
 list_index			:	VARIABLE '.' INDEX '(' dataTypes ')'
 					|	VARIABLE '.' INDEX '('  ')'					{ yyerror("\n INDEX function requires a parameter \n"); }
 					|	'.' INDEX '('  ')'							{ yyerror("\n List name is missing before INDEX function \n"); }
@@ -218,12 +260,14 @@ list_index			:	VARIABLE '.' INDEX '(' dataTypes ')'
 					|	VARIABLE '.' INDEX '(' program_list  ')' 	{ yyerror("\n Invalid syntax for INDEX function of a list \n"); }
 					;
 
+/* List extend */	
 list_extend			:	VARIABLE '.' EXTEND '(' VARIABLE ')'
 					|	'.' EXTEND '(' ')'  						{ yyerror("\n List name is missing before EXTEND function \n"); }
 					|	VARIABLE '.' EXTEND ')'  					{ yyerror("\n Opening bracket is INDEX function of a list \n"); }
 					|	VARIABLE '.' EXTEND '(' program_list  ')' 	{ yyerror("\n Invalid syntax for EXTEND function of a list \n"); }
 					;
 
+/* List count */	
 list_count			:	VARIABLE '.' COUNT '(' dataTypes ')'
 					|	VARIABLE '.' COUNT '('  ')'					{ yyerror("\n COUNT function requires a parameter \n"); }
 					|	'.' COUNT '(' ')'  							{ yyerror("\n List name is missing before COUNT function \n"); }
@@ -231,6 +275,7 @@ list_count			:	VARIABLE '.' COUNT '(' dataTypes ')'
 					|	VARIABLE '.' COUNT '(' program_list  ')' 	{ yyerror("\n Invalid syntax for COUNT function of a list \n"); }
 					;
 
+/* List copy */	
 list_copy			:	VARIABLE '.' COPY '(' ')'
 					|	VARIABLE '.' COPY '(' dataTypes ')'			{ yyerror("\n COPY function does not requires a parameter \n"); }
 					|	'.' COPY '(' ')'  							{ yyerror("\n List name is missing before COPY function \n"); }
@@ -238,6 +283,7 @@ list_copy			:	VARIABLE '.' COPY '(' ')'
 					|	VARIABLE '.' COPY '(' program_list  ')' 	{ yyerror("\n Invalid syntax for COPY function of a list \n"); }
 					;
 
+/* List clear */	
 list_clear			:	VARIABLE '.' CLEAR '(' ')'
 					|	VARIABLE '.' CLEAR '(' dataTypes ')'		{ yyerror("\n CLEAR function does not requires a parameter \n"); }
 					|	'.' CLEAR '(' ')'  							{ yyerror("\n List name is missing before CLEAR function \n"); }
@@ -245,6 +291,7 @@ list_clear			:	VARIABLE '.' CLEAR '(' ')'
 					|	VARIABLE '.' CLEAR '(' program_list  ')' 	{ yyerror("\n Invalid syntax for CLEAR function of a list \n"); }
 					;
 
+/* List sorting */	
 list_sorting		:	VARIABLE '.' SORT '(' ')'
 					|	VARIABLE '.' SORT '(' dataTypes ')'			{ yyerror("\n SORT function does not requires a parameter \n"); }
 					|	'.' SORT '(' ')'  							{ yyerror("\n List name is missing before SORT function \n"); }
@@ -252,6 +299,7 @@ list_sorting		:	VARIABLE '.' SORT '(' ')'
 					|	VARIABLE '.' SORT '(' program_list  ')' 	{ yyerror("\n Invalid syntax for sort function of a list \n"); }
 					;
 
+/* List removing */	
 list_removing		:	VARIABLE '.' REMOVE '(' list_value ')'
 					|	VARIABLE '.' REMOVE '(' dataTypes ')'
 					|	VARIABLE '.' REMOVE '(' boolean ')'		
@@ -262,6 +310,7 @@ list_removing		:	VARIABLE '.' REMOVE '(' list_value ')'
 					|	VARIABLE '.' REMOVE '('  ')' 				{ yyerror("\n Invalid syntax for remove function  of a list \n"); }
 					;
 
+/* List appending */	
 list_appending		:	VARIABLE '.' APPEND '(' list_value ')'
 					|	VARIABLE '.' APPEND '(' dataTypes ')'
 					|	VARIABLE '.' APPEND '(' boolean ')'
@@ -272,6 +321,7 @@ list_appending		:	VARIABLE '.' APPEND '(' list_value ')'
 					|	VARIABLE '.' APPEND '('  ')' 				{ yyerror("\n Invalid syntax for append function  of a list \n"); }
 					;
 
+/* List join */	
 join_list			:	VARIABLE join_list
 					|	'+' VARIABLE
 					|	VARIABLE '+' { yyerror("\n Invalid syntax for joining the list. + wont come at the end \n"); }
@@ -410,7 +460,7 @@ relationalOperators 	:	GT
 						|	NE
 						;
 
-/* */
+/* membership operator */
 membershipOperator		:	IS
 						|	IN
 						;
@@ -421,11 +471,12 @@ bitwiseOperations	:	OR
 					|	NOT
 					;	
 
-
+/* Data types */	
 dataTypes 	:	INTEGER
 			|	VARIABLE
 			;
 
+/* Boolean */	
 boolean		:	BTRUE
 			|	BFALSE
 			;
