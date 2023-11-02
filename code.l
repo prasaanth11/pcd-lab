@@ -12,6 +12,8 @@
 
 "None"		{ return NONE; }
 
+"class"		{ return CLASS; }
+
 "import"	{ return IMPORT; }
 "as"		{ return AS; }
 "from"		{ return FROM; }
@@ -88,6 +90,7 @@
 
 [0-9][0-9]*				{ yylval = atoi(yytext); return INTEGER; }
 [a-zA-Z][a-zA-Z0-9]*	{ yylval = atoi(yytext); return VARIABLE; }
+
 
 [ \t\n] 	;
 .			{ yyerror("\nInvalid characters in the code\n"); }
