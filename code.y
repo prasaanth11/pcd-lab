@@ -121,6 +121,7 @@ assigmentation		:	VARIABLE '=' INTEGER
 					|	VARIABLE '=' VARIABLE '(' ')' 
 					
 					/* error statement in assignment */
+					|	VARIABLE '='							{ yyerror("\n Right hand side production is missing \n"); }
 					|	VARIABLE '=' statements ')' 			{ yyerror("\nOpening bracket is missing \n"); }
 					|	VARIABLE '=' boolean ')' 				{ yyerror("\nOpening bracket is missing \n"); }
 					|	VARIABLE '=' INTEGER ')'	 			{ yyerror("\nOpening bracket is missing \n"); }
@@ -368,7 +369,8 @@ statements			:	STATEMENT statements
 
 
 /* Expression evaluvation */
-expression			:	dataTypes
+expression			:	INTEGER
+					|	VARIABLE
 					|	expression relationalOperations expression 
 					|	expression relationalOperators expression 
 					|	expression bitwiseOperations expression
