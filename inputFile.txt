@@ -1,35 +1,30 @@
-print('hai');
-print("value is " , 5)
-print("value is stored in " + a )
-print("value is stored in " + a + "value")
-print(a + "value")
+from math import sqrt
 
-a = 10
+def calculate( a , b, c ) :
+    return a * b + c
 
-a = "hai this is icon"
+a = 2
+b = 5
+c = 4
 
-print(5 < 9)
-print(5 < 7 , 7 < 9)
+result = calculate( a , b , 10 )
 
-if shan:
-    print(b)
-    if icon:
-        print(a)
-    else:
-        print(c)
-else:
-    print(d)
+print(result)
 
-while a < 5 :
-    print("heai")
-    
-    if a < 3 :
-        print("dfs")
+result = sqrt(result)
+print(result)
 
-icon = [11 , "is a good boi" ]        
-icon.remove(0)
-icon.pop(1)
+a = [1,2,3,4,5]
+d = 10
 
-icon.append("this is icon")
+if d in a :
+    print("present\n")
+else :
+    print("not present\n")
 
-icon = [[2]]
+temp = []
+
+for i in range(6):
+    temp.append(i)
+
+print(temp)
